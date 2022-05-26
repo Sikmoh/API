@@ -1,0 +1,476 @@
+openapi: 3.0.0
+
+info:
+  title: "{{title}}"
+  version: "1.0.0"
+
+# Avoid having a definitive base path here. Set the path in the actual paths - facilitate versions
+# Example v1.0.0/login and v1.0.2 can both be specified
+
+servers:
+  - url: http://127.0.0.1:5003/
+    description: relative path example
+
+paths:
+  # -----------------------------------------------
+  # Facts paths - REQUESTS
+  # -----------------------------------------------
+
+  /facts/random:
+    get:
+      summary: Retrieve a random fact
+      tags:
+        - Fact
+      description: >
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Basic Access Token
+
+        Errors:
+
+          token-invalid, 401
+          authorisation-required, 401
+          not-found, 404
+
+      operationId: cats.endpoints.get_fact
+      parameters:
+        - name: animal_type
+          description: Type of cat
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: amount
+          description: Number of facts
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Returns a data object containing a cats data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactsResponse"
+
+#      security:
+#        - jwt: [ ]
+
+  /facts:
+    get:
+      summary: Retrieve a random facts
+      tags:
+        - Fact
+      description: >
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Basic Access Token
+
+        Errors:
+
+          token-invalid, 401
+          authorisation-required, 401
+          not-found, 404
+
+      operationId: cats.endpoints.get_facts
+      parameters:
+        - name: animal_type
+          description: Type of cat
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: amount
+          description: Number of facts
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Returns a data object containing a cat data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactsListResponse"
+
+  /facts/{fact_id}:
+    get:
+      summary: Retrieve a fact by id
+      tags:
+        - Fact
+      description: >
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Admin Access Token
+
+        Errors:
+
+          token-invalid, 401
+          authorisation-required, 401
+          not-found, 404
+
+      operationId: cats.endpoints.get_fact_id
+      parameters:
+        - name: "fact_id"
+          description: Fact Unique id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: animal_type
+          description: Type of cat
+          in: query
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Returns a data object containing a cats data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactsResponse"
+
+  /users/v1/signup:
+    post:
+      summary: Signup up a new user
+      tags:
+        - Users
+      description: >
+
+        Errors:
+
+            password-invalid, 400
+            email-invalid, 400
+            user-already-exists, 400
+            unsupported media type, 415
+
+      operationId: users.v1.endpoints.signup
+      requestBody:
+        description: Signup Data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSignup"
+
+      responses:
+        "200":
+          description: Returns a success Response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /users/v1/login:
+    post:
+      summary: Login with user's credentials
+      tags:
+        - Users
+      description: >
+
+        Errors:
+
+            not-found, 404
+            password-invalid, 400
+            email-invalid, 400
+            account-disabled, 400
+
+      operationId: users.v1.endpoints.login
+      requestBody:
+        description: Login Data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+
+      responses:
+        "200":
+          description: Returns a JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLoginResponse"
+
+  /users/v1/logout:
+    post:
+      summary: Logout
+      tags:
+        - Users
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+
+            'token-invalid', 401
+            'authorisation-required', 401
+            'User NOT logged out - problem accessing token in request', 400
+
+      operationId: users.v1.endpoints.logout
+      responses:
+        "200":
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+      security:
+        - jwt: [ ]
+
+  /users/v1/email_verification:
+    get:
+      summary: Verifies user's email
+      tags:
+        - Users
+      description: >
+
+        Verifies user's email using an email-token generated when signing-up the user
+
+        Errors:
+
+            'token-invalid', 401
+            'authorisation-required', 401
+
+            'user-not-found', 404
+
+      operationId: users.v1.endpoints.email_verification
+      parameters:
+        - name: token
+          description: Email verification token generated at sign-up time
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns OK
+
+  /users/v1/generate_tokens:
+    get:
+      summary: Generates new user access and refresh tokens
+      tags:
+        - Users
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+            Bearer Valid Basic Access token
+
+        Errors:
+
+          'token-invalid', 401
+          'authorisation-required', 401
+          'user-not-found', 404
+
+      operationId: users.v1.endpoints.generate_new_tokens
+      parameters:
+        - name: old_access_token
+          description: The old access token of the user
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns a new access token (token) and a new refresh token (refresh_token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTokens"
+
+      security:
+        - jwt_refresh: [ ]
+
+# -----------------------------------------------
+# COMPONENTS
+# -----------------------------------------------
+
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: auth.endpoints.decode_token
+
+    jwt_refresh:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: auth.endpoints.decode_refresh_token
+
+
+  # -----------------------------------------------
+  # SCHEMAS
+  # -----------------------------------------------
+  schemas:
+
+    # -----------------------------------------------
+    #  FACT SCHEMAS
+    # -----------------------------------------------
+
+    # -----------------------------------------------
+    #  FACT DATA SCHEMAS
+    # -----------------------------------------------
+
+    BaseCat:
+      properties:
+        id:
+          description: Id of cat
+          type: string
+        _v:
+          description: version number of the fact
+          type: string
+        text:
+          description: Fact about the cat
+        updatedAt:
+          description: Date fact was created
+          type: string
+        source:
+          description: Source of data
+          type: string
+        sentCount:
+          description: I dont know
+          type: string
+        used:
+          description: something about usage
+          type: string
+        user:
+          description: The person who used it
+          type: string
+        deleted:
+          description: Is the fact deleted?
+          type: string
+
+
+
+
+
+    # -----------------------------------------------
+    #  Facts RESPONSE SCHEMAS
+    # -----------------------------------------------
+
+    FactsResponse:
+      allOf:
+        - $ref: "#/components/schemas/BaseCat"
+
+    FactsListResponse:
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/FactsResponse"
+        count:
+          description: total number of facts returned
+          type: object
+
+
+
+
+## -----------------------------------------------
+##  User REQUEST SCHEMA
+## -----------------------------------------------
+#
+    UserID:
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: integer
+          description: User ID
+
+    User:
+      allOf:
+        - $ref: "#/components/schemas/Email"
+        - $ref: "#/components/schemas/UserID"
+
+    UserSignup:
+      allOf:
+        - $ref: "#/components/schemas/AccessRole"
+        - $ref: "#/components/schemas/Credentials"
+
+    AccessRole:
+      properties:
+        access_role:
+          description: Access role of user
+          type: string
+          enum:
+            - admin
+            - basic
+          default: basic
+
+    Credentials:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Password"
+        - $ref: "#/components/schemas/Email"
+
+    Email:
+      required:
+        - email
+      properties:
+        email:
+          description: Email Address
+          type: string
+          pattern: ([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+
+
+    Password:
+      required:
+        - password
+      properties:
+        password:
+          description: Password
+          type: string
+          pattern: (?=\S{8,32})(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[0-9])(?=\S*)(?<!\S)\S{8,32}(?=\s|\Z)
+
+    UserLoginResponse:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/UserTokens"
+        - $ref: "#/components/schemas/User"
+
+  # -----------------------------------------------
+  #  AUTH TOKEN RESPONSE SCHEMAS
+  # -----------------------------------------------
+
+    UserTokens:
+      type: object
+      required:
+        - token
+        - refresh_token
+      properties:
+        token:
+          type: string
+          format: byte
+          description: User's API calls token
+        refresh_token:
+          type: string
+          format: byte
+          description: User's refresh token
+
+
+    StatusOk:
+      type: string
+      description: API call success
+      default: ok
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/StatusOk"
