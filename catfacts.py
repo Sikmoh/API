@@ -29,13 +29,7 @@ URL = 'https://cat-fact.herokuapp.com'
 
 
 class Facts(object):
-    """
-        Facts object
-        Facilitates Async Calls to the cat API for retrieval of star wars data.
-        All methods are static helper functions with the exception of request_data.
-        The request_data function is used to retrieve star wars data and called via api
-        StarWars class object instance.
-    """
+   
 
     def __init__(self, **kwargs):
 
@@ -85,8 +79,8 @@ class Facts(object):
         """
             This method formats n number of urls with the parameter 'query'
             param: query - the api query parameter i.e. films or people
-            param: max_items: The maximum number of items to fetch
-            params: batch_size: The maximum items returned across all batches/api calls
+            param: animal_type: The maximum number of items to fetch
+            params: amount: The maximum items returned
         """
         # Create the initial url
         urls = []
