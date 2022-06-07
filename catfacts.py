@@ -29,7 +29,6 @@ URL = 'https://cat-fact.herokuapp.com'
 
 
 class Facts(object):
-   
 
     def __init__(self, **kwargs):
 
@@ -78,9 +77,9 @@ class Facts(object):
     def request_data_async(self, query, animal_type=None, amount=None):
         """
             This method formats n number of urls with the parameter 'query'
-            param: query - the api query parameter i.e. films or people
-            param: animal_type: The maximum number of items to fetch
-            params: amount: The maximum items returned
+            param: query - the api query parameter
+            param: animal_type: The type of animal i.e cat
+            params: amount: The maximum facts returned
         """
         # Create the initial url
         urls = []
