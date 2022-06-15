@@ -130,7 +130,7 @@ class Facts(object):
             elif status == 400:
                 msg = "bad-request"
             elif status == 500:
-                msg = "server-error-star-wars-api"
+                msg = "server-error-"
             else:
                 msg = "something-went-wrong"
             raise ApiError(message=msg, status_code=status)
